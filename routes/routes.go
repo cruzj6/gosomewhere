@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -23,7 +22,6 @@ func SetupRoutes() *mux.Router{
 
 	for _, route := range registeredRoutes {
 
-		fmt.Println("A route! %s %s", route.Path, route.Method)
 		s := r.PathPrefix(route.Path).Subrouter()
 		s.HandleFunc("/", route.HandleRoute).Methods(route.Method)
 

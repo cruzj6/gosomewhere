@@ -1,6 +1,7 @@
 package random
 
 import (
+	"fmt"
 	"net/http"
 	"encoding/json"
 
@@ -13,13 +14,17 @@ type LatLon struct {
 	Lat, Lon float32
 }
 
+type RandomPointRequest struct {
+	MinLatLon, MaxLatLon LatLon
+}
+
 const BASE_ROUTE = "/random/"
 
 func RegisterRoute() randomRouter{
 	rr := randomRouter{}
 
-	baseRoute := routes.MakeRoute(BASE_ROUTE, "GET", rr.randomHandler)
-	distanceRoute := routes.MakeRoute("/distance/", "GET", rr.distanceHandler)
+	baseRoute := routes.MakeRoute(BASE_ROUTE, "GET", rr.randomPointHandler)
+	distanceRoute := routes.MakeRoute("/distance/", "GET", rr.randomDistanceHandler)
 
 	baseRoute.AddSubRoute(distanceRoute)
 	routes.RegisterRoute(baseRoute)
@@ -27,12 +32,24 @@ func RegisterRoute() randomRouter{
 	return rr
 }
 
-func (rr *randomRouter) distanceHandler(w http.ResponseWriter, r *http.Request) {
+func (rr *randomRouter) randomDistanceHandler(w http.ResponseWriter, r *http.Request) {
 	distance := rr.randomDistance()
 	json.NewEncoder(w).Encode(distance)
 }
 
-func (rr *randomRouter) randomHandler(w http.ResponseWriter, r *http.Request) {
-	latlon := rr.randomPoint()
+func (rr *randomRouter) randomPointHandler(w http.ResponseWriter, r *http.Request) {
+	var latlon LatLon
+
+	if(r.Body == nil) {
+		latlon = rr.randomPoint()
+	} else {
+		var randomPointRequest RandomPointRequest
+		err := json.NewDecoder(r.Body).Decode(&randomPointRequest)
+
+		if(err != nil) {
+			fmt.Fprintf(w, err.Error())
+		}
+	}
+
 	json.NewEncoder(w).Encode(latlon)
 }
