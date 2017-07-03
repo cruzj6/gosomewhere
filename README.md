@@ -1,2 +1,2 @@
 # gosomewhere
-An API for location and coordinates. Written to learn the Go language.
+An API for location and coordinates. Written to learn golang.
